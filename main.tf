@@ -14,11 +14,6 @@ data "aws_internet_gateways" "existing" {
 }
 
 resource "aws_internet_gateway" "igw" {
-  count  = length(data.aws_internet_gateways.existing.ids) == 0 ? 1 : 0
-  vpc_id = data.aws_vpc.target.id
-}
-
-resource "aws_internet_gateway" "igw" {
   vpc_id = data.aws_vpc.target.id
 }
 
