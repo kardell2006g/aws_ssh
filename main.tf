@@ -18,7 +18,7 @@ data "aws_internet_gateway" "existing" {
 # Create a new public subnet in your VPC
 resource "aws_subnet" "public" {
   vpc_id                  = data.aws_vpc.target.id
-  cidr_block              = "10.64.33.0/24"
+  cidr_block              = "10.64.65.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "us-east-2a"
   tags = {
