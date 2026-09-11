@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1" # Change as needed
+  region = "us-east-2" # Change as needed
 }
 
 # Find the latest Amazon Linux 2 AMI
