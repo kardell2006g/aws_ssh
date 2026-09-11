@@ -75,4 +75,16 @@ data "aws_ami" "amazon_linux" {
 resource "aws_instance" "vault_linux" {
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = "t2.micro"
-  key_name                   
+  key_name                    = "vault"
+  subnet_id                   = aws_subnet.public.id
+  vpc_security_group_ids      = [aws_security_group.allow_ssh.id]
+  associate_public_ip_address = true
+
+  tags = {
+    Name = "vault-linux-instance"
+  }
+}
+
+output "instance_public_ip" {
+  value = aws_instance.vault_linux.public_ip
+}              
