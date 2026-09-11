@@ -18,6 +18,10 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = data.aws_vpc.target.id
 }
 
+resource "aws_internet_gateway" "igw" {
+  vpc_id = data.aws_vpc.target.id
+}
+
 locals {
   igw_id = length(data.aws_internet_gateways.existing.ids) > 0 ? data.aws_internet_gateways.existing.ids[0] : aws_internet_gateway.igw[0].id
 }
