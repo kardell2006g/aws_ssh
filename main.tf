@@ -63,6 +63,8 @@ resource "aws_instance" "vault_linux" {
   subnet_id              = data.aws_subnet.target.id
   vpc_security_group_ids = [aws_security_group.allow_ssh.id]
 
+ associate_public_ip_address = true
+
   tags = {
     Name = "vault-linux-instance"
   }
