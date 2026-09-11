@@ -22,13 +22,16 @@ data "aws_vpc" "target" {
   id = "vpc-04ab17a47803f2f91"
 }
 
-# Find a subnet in the VPC (picks the first available)
-data "aws_subnet_ids" "target" {
-  vpc_id = data.aws_vpc.target.id
+# Find all subnets in the VPC (use the first one)
+data "aws_subnets" "target" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.target.id]
+  }
 }
 
 data "aws_subnet" "target" {
-  id = data.aws_subnet_ids.target.ids[0]
+  id = data.aws_subnets.target.ids[0]
 }
 
 # Security group in the specified VPC
