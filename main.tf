@@ -12,7 +12,7 @@ resource "aws_internet_gateway" "igw" {
 
 resource "aws_subnet" "public" {
   vpc_id                  = data.aws_vpc.target.id
-  cidr_block              = "10.0.10.0/24" # Ensure this does not overlap with existing subnets
+  cidr_block              = "10.0.11.0/24" # Ensure this does not overlap with existing subnets
   map_public_ip_on_launch = true
   availability_zone       = "us-east-2a"
   tags = {
