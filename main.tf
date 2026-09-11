@@ -99,3 +99,72 @@ resource "aws_instance" "vault_linux" {
 output "instance_public_ip" {
   value = aws_instance.vault_linux.public_ip
 }
+
+
+# -------------------------------
+# Boundary Worker EC2 Instance
+# -------------------------------
+
+resource "aws_instance" "boundary_worker" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = "t2.micro"
+  key_name                    = "vault"
+  subnet_id                   = aws_subnet.public.id
+  vpc_security_group_ids      = [aws_security_group.allow_ssh.id]
+  associate_public_ip_address = true
+
+  tags = {
+    Name = "boundary-worker"
+  }
+
+  user_data = <<-EOF
+    #!/bin/bash
+    yum install -y unzip wget
+    wget https://releases.hashicorp.com/boundary/0.15.0/boundary_0.15.0_linux_amd64.zip
+    unzip boundary_0.15.0_linux_amd64.zip
+    mv boundary /usr/local/bin/
+    useradd --system --home /etc/boundary --shell /bin/false boundary
+    mkdir -p /etc/boundary
+    chown boundary:boundary /etc/boundary
+
+    cat <<EOC > /etc/boundary/worker.hcl
+    disable_mlock = true
+
+    worker {
+      name = "boundary-worker"
+      description = "Boundary worker deployed via Terraform"
+      public_addr = "$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):9202"
+      tags = ["aws", "terraform"]
+    }
+
+    controller {
+      address = "https://c49d8ff5-28fa-4e8f-9dc7-6096c3452b50.boundary.hashicorp.cloud"
+    }
+    EOC
+
+    chown boundary:boundary /etc/boundary/worker.hcl
+
+    cat <<EOS > /etc/systemd/system/boundary-worker.service
+    [Unit]
+    Description=HashiCorp Boundary Worker
+    After=network.target
+
+    [Service]
+    User=boundary
+    Group=boundary
+    ExecStart=/usr/local/bin/boundary server -config=/etc/boundary/worker.hcl
+    Restart=on-failure
+
+    [Install]
+    WantedBy=multi-user.target
+    EOS
+
+    systemctl daemon-reload
+    systemctl enable boundary-worker
+    systemctl start boundary-worker
+  EOF
+}
+
+output "boundary_worker_public_ip" {
+  value = aws_instance.boundary_worker.public_ip
+}
